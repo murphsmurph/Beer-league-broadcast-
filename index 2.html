@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Hotter Than Hell · Call Sheet</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#10151A; --panel:#1C232B; --line:#1E2630; --line2:#2A3440;
+    --border:#2E3944; --text:#F2F4F6; --dim:#8CA0B3; --faint:#5B6B7A;
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--text);
+    font-family:'Inter',system-ui,sans-serif; -webkit-text-size-adjust:100%; }
+  .wrap { max-width:430px; margin:0 auto; padding-bottom:32px; }
+  .cond { font-family:'Barlow Condensed',sans-serif; }
+
+  .topbar { display:flex; align-items:center; justify-content:space-between;
+    padding:14px 12px 10px; }
+  .title { font-family:'Barlow Condensed',sans-serif; font-size:15px; font-weight:700;
+    letter-spacing:.14em; text-transform:uppercase; }
+  .subtitle { font-size:10.5px; color:var(--faint); letter-spacing:.04em; margin-top:2px; }
+
+  .btn { background:var(--panel); color:#B9C6D2; border:1px solid var(--border);
+    border-radius:6px; font-size:12px; font-weight:700; padding:6px 10px;
+    cursor:pointer; letter-spacing:.02em; font-family:inherit; }
+  .btn.on { background:#B58BD6; color:#10151A; border-color:#B58BD6; }
+
+  /* schedule strip */
+  .sched { display:flex; gap:6px; overflow-x:auto; padding:2px 12px 10px;
+    -webkit-overflow-scrolling:touch; scrollbar-width:none; }
+  .sched::-webkit-scrollbar { display:none; }
+  .game { flex-shrink:0; background:var(--panel); border:1px solid var(--border);
+    border-radius:8px; padding:6px 10px; cursor:pointer; text-align:left;
+    color:var(--text); font-family:inherit; }
+  .game.sel { border-color:#B58BD6; background:#241C2E; }
+  .game.tbd { opacity:.4; cursor:default; }
+  .game .gt { font-size:11px; font-weight:700; color:#C9A86A; }
+  .game .gm { font-family:'Barlow Condensed',sans-serif; font-size:14px; font-weight:600;
+    text-transform:uppercase; letter-spacing:.03em; white-space:nowrap; margin-top:1px; }
+  .game .tier { font-size:9.5px; color:var(--faint); margin-top:1px; }
+
+  .cols { display:flex; }
+  .vr { width:1px; background:var(--line); flex-shrink:0; }
+  .col { flex:1; min-width:0; }
+  .colhead { padding:10px 8px 8px; margin-bottom:2px; }
+  .teamsel { width:100%; background:transparent; border:none; padding:0;
+    font-family:'Barlow Condensed',sans-serif; font-size:21px; font-weight:700;
+    letter-spacing:.05em; text-transform:uppercase; cursor:pointer;
+    appearance:none; -webkit-appearance:none; }
+  .teamsel option { background:var(--panel); color:var(--text); font-size:16px; }
+
+  .swatches { display:flex; gap:6px; margin-top:8px; flex-wrap:wrap; }
+  .swatch { width:18px; height:18px; border-radius:9px; border:2px solid transparent;
+    cursor:pointer; padding:0; }
+  .swatch.sel { border-color:#fff; }
+
+  .tools { padding:0 8px 8px; }
+  .toolrow { display:flex; gap:6px; flex-wrap:wrap; }
+  textarea, .field { width:100%; background:var(--panel); border:1px solid var(--border);
+    border-radius:6px; color:var(--text); font-size:13px; padding:7px 8px;
+    font-family:inherit; }
+  textarea { font-family:ui-monospace,monospace; margin-top:8px; }
+  ::placeholder { color:var(--faint); }
+  .hint { margin-top:6px; font-size:11.5px; color:#C9A86A; line-height:1.35; }
+
+  .row { display:flex; align-items:center; gap:8px; padding:6px 8px;
+    border-bottom:1px solid var(--line); }
+  .num { font-family:'Barlow Condensed',sans-serif; font-variant-numeric:tabular-nums;
+    font-size:30px; font-weight:700; color:#fff; width:44px; text-align:right;
+    line-height:1; flex-shrink:0; }
+  .sep { width:1px; align-self:stretch; background:var(--line2); flex-shrink:0; }
+  .nm { min-width:0; line-height:1.05; }
+  .last { font-family:'Barlow Condensed',sans-serif; font-size:19px; font-weight:600;
+    letter-spacing:.03em; text-transform:uppercase; white-space:nowrap;
+    overflow:hidden; text-overflow:ellipsis; }
+  .first { font-size:11.5px; color:var(--dim); margin-top:2px; }
+  .gtag { margin-left:6px; font-size:12px; font-weight:700; vertical-align:2px; }
+
+  .erow input { background:var(--panel); border:1px solid var(--border);
+    border-radius:5px; color:var(--text); font-size:13px; padding:4px 6px;
+    min-width:0; font-family:inherit; }
+  .erow .en { width:34px; text-align:center; font-weight:700; padding:4px 2px; }
+  .erow .el { flex:1.3; }
+  .erow .ef { flex:1; }
+  .chip { width:24px; height:24px; border-radius:5px; border:1px solid var(--border);
+    background:var(--panel); font-size:11px; font-weight:700; cursor:pointer;
+    flex-shrink:0; padding:0; color:#8CA0B3; font-family:inherit; }
+  .chip.del { color:#C97A7A; }
+
+  .foot { padding:12px 12px 24px; font-size:10.5px; color:#3E4B58; text-align:center; }
+  button:focus-visible, input:focus-visible, textarea:focus-visible,
+  select:focus-visible { outline:2px solid #B58BD6; outline-offset:1px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <div>
+      <div class="title">Hotter Than Hell · Call Sheet</div>
+      <div class="subtitle">Tap a game to load the matchup</div>
+    </div>
+    <button class="btn" id="editBtn">Edit</button>
+  </div>
+  <div class="sched" id="sched"></div>
+  <div class="cols">
+    <div class="col" id="colL"></div>
+    <div class="vr"></div>
+    <div class="col" id="colR"></div>
+  </div>
+  <div class="foot">Sat Jul 18 slate · edits save on this device · dash = no number on GameSheet</div>
+</div>
+
+<script>
+var RAW_TEAMS = [{"name": "Angry Beavers Lower", "players": [{"n": 0, "first": "Eric", "last": "Weideman", "g": false}, {"n": 3, "first": "Adam", "last": "Cline", "g": false}, {"n": 6, "first": "Kevin", "last": "Gresham", "g": false}, {"n": 7, "first": "Justin", "last": "Byrd", "g": false}, {"n": 14, "first": "Dave", "last": "Orahoske", "g": false}, {"n": 18, "first": "Cole", "last": "Franklin", "g": false}, {"n": 21, "first": "Michael", "last": "Gerber", "g": false}, {"n": 22, "first": "Ryan", "last": "Grosvenor", "g": false}, {"n": 33, "first": "Kernwood", "last": "Brown", "g": false}, {"n": 49, "first": "Laben", "last": "Byers", "g": false}, {"n": 69, "first": "Alex", "last": "Miller", "g": false}, {"n": 84, "first": "Mike", "last": "Johannesson", "g": false}]}, {"name": "Angry Beavers Upper", "players": [{"n": 6, "first": "Kevin", "last": "Gresham", "g": false}, {"n": 8, "first": "Carter", "last": "Fitzpatrick", "g": false}, {"n": 9, "first": "Garrett", "last": "Brunk", "g": false}, {"n": 11, "first": "Brayten", "last": "Sanders", "g": false}, {"n": 16, "first": "Sam", "last": "Nelson", "g": false}, {"n": 18, "first": "Cole", "last": "Morris", "g": false}, {"n": 19, "first": "Lucas", "last": "Woods", "g": false}, {"n": 27, "first": "Hunter", "last": "Eichholz", "g": false}, {"n": 45, "first": "Sikander", "last": "Babar", "g": false}, {"n": 56, "first": "Danny", "last": "Rudman", "g": false}, {"n": 69, "first": "Alex", "last": "Miller", "g": false}, {"n": 78, "first": "CJ", "last": "Luetkemeyer", "g": false}, {"n": 81, "first": "Tony", "last": "Ewen", "g": false}, {"n": 99, "first": "Haider", "last": "Babar", "g": false}]}, {"name": "Bolts", "players": [{"n": 3, "first": "Gage", "last": "Vierzba", "g": false}, {"n": 13, "first": "Kelby", "last": "Vierzba", "g": false}, {"n": 14, "first": "AJ", "last": "Riggle", "g": false}, {"n": 17, "first": "Jared", "last": "Penning", "g": false}, {"n": 19, "first": "Landon", "last": "Miller", "g": false}, {"n": 21, "first": "Cameron", "last": "Morgan", "g": false}, {"n": 27, "first": "Jared", "last": "Lueddecke", "g": false}, {"n": 43, "first": "Kaden", "last": "Smith", "g": false}, {"n": 47, "first": "Cooper", "last": "Merritt", "g": false}, {"n": 48, "first": "Brady", "last": "Anderson", "g": false}, {"n": 74, "first": "Brayden", "last": "Uglow", "g": false}, {"n": 81, "first": "Lonnie", "last": "Land", "g": false}, {"n": 88, "first": "Connor", "last": "White", "g": false}, {"n": 98, "first": "Owen", "last": "Maire", "g": false}]}, {"name": "Buncha Oldies", "players": [{"n": 3, "first": "Mike", "last": "Bisesi", "g": false}, {"n": 10, "first": "Jonathan", "last": "Spegal", "g": false}, {"n": 12, "first": "Kevin", "last": "Marshall", "g": false}, {"n": 16, "first": "Ryan", "last": "Tiemeyer", "g": false}, {"n": 17, "first": "Cary", "last": "Jennings", "g": false}, {"n": 18, "first": "Ian", "last": "Scheihing", "g": false}, {"n": 19, "first": "Ryan", "last": "Kirkley", "g": false}, {"n": 21, "first": "Mike", "last": "Ortega", "g": false}, {"n": 27, "first": "Brad", "last": "Bengtson", "g": false}, {"n": 32, "first": "Danny", "last": "Cook", "g": false}, {"n": 33, "first": "Kevin", "last": "Hoehne", "g": false}, {"n": 37, "first": "Ryan", "last": "Brown", "g": false}, {"n": 42, "first": "PJ", "last": "Dilallo", "g": false}, {"n": 61, "first": "Justin", "last": "Brown", "g": false}, {"n": 71, "first": "Frank", "last": "Gallion", "g": false}, {"n": 89, "first": "Clayton", "last": "Lucas", "g": false}, {"n": 91, "first": "Mark", "last": "Mattei", "g": false}]}, {"name": "Cake Eaters", "players": [{"n": 2, "first": "Luke", "last": "Walters", "g": false}, {"n": 5, "first": "Zach", "last": "Portell", "g": false}, {"n": 10, "first": "Tyler", "last": "Grau", "g": false}, {"n": 12, "first": "Harrison", "last": "Winter", "g": false}, {"n": 14, "first": "Kayden", "last": "Krull", "g": false}, {"n": 15, "first": "Brandon", "last": "Coomer", "g": false}, {"n": 17, "first": "Alex", "last": "Robinson", "g": false}, {"n": 18, "first": "Rusty", "last": "Hess", "g": false}, {"n": 22, "first": "Devin", "last": "Tockman", "g": false}, {"n": 29, "first": "Mason", "last": "Budde", "g": false}, {"n": 55, "first": "Michael", "last": "Kreis", "g": false}, {"n": 76, "first": "John", "last": "Yeates", "g": false}, {"n": 77, "first": "Alex", "last": "Koeller", "g": false}, {"n": 82, "first": "Austin", "last": "Brandenburg", "g": false}, {"n": 90, "first": "Conner", "last": "Cave", "g": false}, {"n": 92, "first": "Everitt", "last": "Nea", "g": false}, {"n": 96, "first": "Michael", "last": "Mesker", "g": false}, {"n": 98, "first": "Zach", "last": "Sutton", "g": false}]}, {"name": "Charlie Foxtrot", "players": [{"n": 6, "first": "Nick", "last": "Jones", "g": false}, {"n": 7, "first": "David", "last": "Dinges", "g": false}, {"n": 10, "first": "Fred", "last": "Frees", "g": false}, {"n": 22, "first": "RJ", "last": "Portilla", "g": false}, {"n": 23, "first": "Corey", "last": "Mchugh", "g": false}, {"n": 24, "first": "Denis", "last": "Seiglie", "g": false}, {"n": 25, "first": "Christopher", "last": "Dewitt", "g": false}, {"n": 29, "first": "Mason", "last": "York", "g": false}, {"n": 34, "first": "Neil", "last": "Beatty", "g": false}, {"n": 37, "first": "Dylan", "last": "Nilson", "g": false}, {"n": 45, "first": "Norm", "last": "Kuntz", "g": false}, {"n": 49, "first": "Josh", "last": "Yakel", "g": false}, {"n": 52, "first": "Zach", "last": "Jarvis", "g": false}, {"n": 53, "first": "Billy", "last": "Harshbarger", "g": false}, {"n": 68, "first": "Kristopher", "last": "Mandler", "g": false}, {"n": 84, "first": "Greg", "last": "Burian", "g": false}]}, {"name": "Deep Blue", "players": [{"n": 5, "first": "Ryan", "last": "Cook", "g": false}, {"n": 7, "first": "Brian", "last": "Greco", "g": false}, {"n": 16, "first": "Brian", "last": "Bolte", "g": false}, {"n": 17, "first": "John", "last": "Armbrister", "g": false}, {"n": 19, "first": "Andrew", "last": "Cato", "g": false}, {"n": 21, "first": "Dominick", "last": "Valenti", "g": false}, {"n": 23, "first": "Brandon", "last": "Ries", "g": false}, {"n": 40, "first": "Aaron", "last": "Shelhamer", "g": false}, {"n": 51, "first": "John", "last": "Hart", "g": false}, {"n": 57, "first": "Jim", "last": "Hellmann", "g": false}, {"n": 59, "first": "Nathan", "last": "Geno", "g": false}, {"n": 66, "first": "Guy", "last": "Persinger", "g": false}, {"n": 67, "first": "Clint", "last": "Montoya", "g": false}, {"n": 72, "first": "Danny", "last": "Freeman", "g": false}, {"n": 82, "first": "Jason", "last": "Vanover", "g": false}, {"n": 88, "first": "A", "last": "Goz", "g": false}, {"n": 92, "first": "Tim", "last": "Tanner", "g": false}, {"n": null, "first": "Robert", "last": "Simpson", "g": false}]}, {"name": "Ghost Peppers", "players": [{"n": 1, "first": "James", "last": "Kummer", "g": true}, {"n": 3, "first": "Kevin", "last": "Garthe", "g": false}, {"n": 6, "first": "Jay", "last": "Peters", "g": false}, {"n": 12, "first": "Doug", "last": "Brown", "g": false}, {"n": 14, "first": "Adam", "last": "Novik", "g": false}, {"n": 19, "first": "William", "last": "Garthe", "g": false}, {"n": 21, "first": "Cory", "last": "Francis", "g": false}, {"n": 22, "first": "Paul", "last": "Heine", "g": false}, {"n": 23, "first": "Jake", "last": "Johnson", "g": false}, {"n": 24, "first": "Chuck", "last": "Kuchar", "g": false}, {"n": 49, "first": "Michael", "last": "Greiner", "g": false}, {"n": 77, "first": "George", "last": "Baldas", "g": false}, {"n": 80, "first": "Don", "last": "Schisler", "g": false}, {"n": 81, "first": "Jeff", "last": "Cooley", "g": false}, {"n": 86, "first": "John", "last": "Leicht", "g": false}, {"n": 87, "first": "Brian", "last": "Hazzard", "g": false}, {"n": 98, "first": "Ken", "last": "Garthe", "g": false}]}, {"name": "Mid Ice Crisis", "players": [{"n": 1, "first": "Steve", "last": "Rinkel", "g": false}, {"n": 2, "first": "Jody", "last": "Yeates", "g": false}, {"n": 9, "first": "Justin", "last": "White", "g": false}, {"n": 10, "first": "Sahila", "last": "Brandt", "g": false}, {"n": 14, "first": "Jess", "last": "Pikul", "g": false}, {"n": 15, "first": "Jomarie", "last": "Wolpert", "g": false}, {"n": 17, "first": "Angie", "last": "Bolin", "g": false}, {"n": 21, "first": "Rachael", "last": "Theiss", "g": false}, {"n": 27, "first": "Jenn", "last": "Laudel", "g": false}, {"n": 40, "first": "Lynnsey", "last": "Delaney", "g": false}, {"n": 77, "first": "Christina", "last": "Anderson", "g": false}, {"n": 82, "first": "Grace", "last": "Kincaid", "g": false}, {"n": 95, "first": "Erin", "last": "Freeman", "g": false}, {"n": 98, "first": "Tracy", "last": "Middleton", "g": false}]}, {"name": "Mighty Drunks", "players": [{"n": 1, "first": "Cory", "last": "Hoke", "g": false}, {"n": 2, "first": "Jim", "last": "Overton", "g": false}, {"n": 4, "first": "Wes", "last": "Willbrand", "g": false}, {"n": 6, "first": "Mark", "last": "Debold", "g": false}, {"n": 7, "first": "Bill", "last": "Beck", "g": false}, {"n": 13, "first": "Dave", "last": "Walters", "g": false}, {"n": 16, "first": "Ben", "last": "Gathard", "g": false}, {"n": 27, "first": "Bryan", "last": "Anderson", "g": false}, {"n": 28, "first": "Matteo", "last": "Mantese", "g": false}, {"n": 31, "first": "Nick", "last": "Walters", "g": true}, {"n": 41, "first": "Cole", "last": "Woodard", "g": false}, {"n": 76, "first": "Steve", "last": "Schult", "g": false}, {"n": 88, "first": "Josh", "last": "Creahan", "g": false}, {"n": 96, "first": "Chris", "last": "Schulze", "g": false}]}, {"name": "Milkmen", "players": [{"n": 5, "first": "Nick", "last": "Seitz", "g": false}, {"n": 9, "first": "Colin", "last": "Mcintyre", "g": false}, {"n": 14, "first": "Nate", "last": "Schwandt", "g": false}, {"n": 21, "first": "Bradon", "last": "Krawczyk", "g": false}, {"n": 22, "first": "Jason", "last": "Humphries", "g": false}, {"n": 31, "first": "Matt", "last": "Germer", "g": false}, {"n": 62, "first": "Kyle", "last": "Bauer", "g": false}, {"n": 63, "first": "Robby", "last": "Suozzi", "g": false}, {"n": 70, "first": "Nate", "last": "Brown", "g": true}, {"n": 75, "first": "Matt", "last": "Brown", "g": false}, {"n": 89, "first": "Cameron", "last": "Cox", "g": false}, {"n": null, "first": "Brandon", "last": "Keesey", "g": false}, {"n": null, "first": "Cole", "last": "Kersting", "g": false}, {"n": null, "first": "Andrew", "last": "Kramer", "g": false}, {"n": null, "first": "Carmen", "last": "Merlo", "g": false}, {"n": null, "first": "Casey", "last": "Merlo", "g": false}, {"n": null, "first": "Cody", "last": "Merlo", "g": false}, {"n": null, "first": "Tony", "last": "Sanford", "g": false}, {"n": null, "first": "Kiril", "last": "Slabun", "g": false}]}, {"name": "Quackheads", "players": [{"n": 8, "first": "Jacob", "last": "Lawton", "g": false}, {"n": 9, "first": "Adam", "last": "Balzer", "g": false}, {"n": 10, "first": "TY", "last": "Klingelhoefer", "g": false}, {"n": 14, "first": "Brad", "last": "Callahan", "g": false}, {"n": 15, "first": "Branden", "last": "Wiethaupt", "g": false}, {"n": 21, "first": "Cameron", "last": "Carden", "g": false}, {"n": 23, "first": "Cody", "last": "Snyder", "g": false}, {"n": 27, "first": "Matt", "last": "Wolf", "g": false}, {"n": 36, "first": "Drake", "last": "Johnston", "g": false}, {"n": 37, "first": "Brett", "last": "Elam", "g": false}, {"n": 39, "first": "Tommie", "last": "Schaljo", "g": false}, {"n": 41, "first": "Dillon", "last": "Declue", "g": false}, {"n": 48, "first": "Kyle", "last": "Gnau", "g": false}, {"n": 55, "first": "Grant", "last": "Hartenbach", "g": false}, {"n": 73, "first": "Greg", "last": "Krussel", "g": false}, {"n": 74, "first": "Luke", "last": "Yahn", "g": false}, {"n": 80, "first": "Matt", "last": "Kenyon", "g": false}, {"n": 90, "first": "Grant", "last": "Merritt", "g": false}]}, {"name": "Rink Weiners", "players": [{"n": 7, "first": "Bill", "last": "Beck", "g": false}, {"n": 8, "first": "Mik", "last": "Ebert", "g": false}, {"n": 9, "first": "Peter", "last": "Sanford", "g": false}, {"n": 11, "first": "Drew", "last": "Williamson", "g": false}, {"n": 14, "first": "Ryan", "last": "Jennings", "g": false}, {"n": 22, "first": "Kaleb", "last": "Propst", "g": false}, {"n": 34, "first": "Frank", "last": "Patrick", "g": false}, {"n": 37, "first": "Eric", "last": "Blachard", "g": true}, {"n": 57, "first": "Jim", "last": "Hellman", "g": false}, {"n": 64, "first": "Trey", "last": "Viers", "g": false}, {"n": 75, "first": "Chris", "last": "Ellis", "g": false}, {"n": 86, "first": "Jake", "last": "Fulton", "g": false}, {"n": 92, "first": "Tim", "last": "Tanner", "g": false}]}, {"name": "Scott Archers", "players": [{"n": 2, "first": "Sam", "last": "Gulley", "g": false}, {"n": 7, "first": "Mike", "last": "Cartone", "g": false}, {"n": 8, "first": "Nate", "last": "Hutslar", "g": false}, {"n": 11, "first": "Steve", "last": "Keddie", "g": false}, {"n": 14, "first": "Matt", "last": "James", "g": false}, {"n": 15, "first": "Adam", "last": "Canty", "g": false}, {"n": 18, "first": "Jack", "last": "Bazner", "g": false}, {"n": 23, "first": "Kyle", "last": "Schreiber", "g": false}, {"n": 27, "first": "Trevor", "last": "Wygle", "g": false}, {"n": 68, "first": "Kris", "last": "Mandler", "g": false}, {"n": 71, "first": "Nick", "last": "Tayon", "g": false}, {"n": 73, "first": "Matt", "last": "Cancilla", "g": false}, {"n": 90, "first": "Tyler", "last": "Murphy", "g": false}, {"n": 95, "first": "Tommy", "last": "Barone", "g": false}]}, {"name": "Shift Happens", "players": [{"n": 3, "first": "Suzi", "last": "Ahlf", "g": false}, {"n": 7, "first": "Brian", "last": "Patton", "g": false}, {"n": 8, "first": "Kim", "last": "Davis", "g": false}, {"n": 13, "first": "Ashley", "last": "Pitlyk", "g": false}, {"n": 14, "first": "Sarah", "last": "Strohmeyer", "g": false}, {"n": 16, "first": "Tessa", "last": "Miller", "g": false}, {"n": 18, "first": "Lesley", "last": "Weinstein", "g": false}, {"n": 23, "first": "Amanda", "last": "Kutsia", "g": false}, {"n": 24, "first": "Jeff", "last": "Parsons", "g": false}, {"n": 34, "first": "Tiffany", "last": "Simon", "g": false}, {"n": 57, "first": "John", "last": "Whitteck", "g": false}, {"n": 72, "first": "Stephanie", "last": "Foley", "g": false}, {"n": 77, "first": "Abigail", "last": "Bullar", "g": false}, {"n": 91, "first": "Sergei", "last": "Himpel", "g": false}]}, {"name": "Toe Dragons", "players": [{"n": 1, "first": "Nicholas", "last": "Bode", "g": false}, {"n": 8, "first": "Benton", "last": "Squires", "g": false}, {"n": 9, "first": "Alex", "last": "Earlewine", "g": false}, {"n": 10, "first": "Layton", "last": "Boettler", "g": false}, {"n": 14, "first": "Teddy", "last": "Deles", "g": false}, {"n": 17, "first": "Alexander", "last": "Lauvray", "g": false}, {"n": 19, "first": "Joe", "last": "Pybas", "g": false}, {"n": 26, "first": "Brett", "last": "Stricker", "g": false}, {"n": 33, "first": "Tony", "last": "Arend", "g": false}, {"n": 41, "first": "Jonathan", "last": "Dolan", "g": false}, {"n": 59, "first": "Jack", "last": "Huffman", "g": false}, {"n": 61, "first": "Pat", "last": "Markovitz", "g": false}, {"n": 67, "first": "Steven", "last": "Mccoy", "g": false}, {"n": 98, "first": "Jordan", "last": "Handley", "g": false}]}, {"name": "USA Warriors", "players": [{"n": 12, "first": "Brooke", "last": "Zimmerman", "g": false}, {"n": 16, "first": "Jane", "last": "Polcen", "g": false}, {"n": 21, "first": "Val", "last": "Seleneza", "g": false}, {"n": 22, "first": "James", "last": "Murphy", "g": false}, {"n": 26, "first": "Gabe", "last": "Medina", "g": false}, {"n": 47, "first": "Donnelly", "last": "Justus", "g": false}, {"n": 49, "first": "Jacob", "last": "Sigler", "g": false}, {"n": 52, "first": "Tiffanie", "last": "Lindsey", "g": false}, {"n": 57, "first": "Caleigh", "last": "Sable", "g": false}, {"n": 58, "first": "Jon", "last": "Perry", "g": false}, {"n": 63, "first": "Chris", "last": "Kunde", "g": false}, {"n": 65, "first": "Sean", "last": "Sexton", "g": false}, {"n": 67, "first": "Faith", "last": "Hayes", "g": false}, {"n": 79, "first": "Keith", "last": "Burley", "g": false}, {"n": 82, "first": "Jon", "last": "Albrecht", "g": false}]}, {"name": "Veterans United", "players": [{"n": 0, "first": "David", "last": "Tharenos", "g": false}, {"n": 1, "first": "Marc", "last": "Kirskey", "g": false}, {"n": 2, "first": "Peter", "last": "Rubis", "g": false}, {"n": 3, "first": "Kyle", "last": "Hirschman", "g": false}, {"n": 4, "first": "Connor", "last": "Cline", "g": false}, {"n": 6, "first": "Frank", "last": "Condillre", "g": false}, {"n": 9, "first": "Chris", "last": "Holdman", "g": false}, {"n": 10, "first": "Phil", "last": "Hojnowski", "g": false}, {"n": 13, "first": "Alex", "last": "Mueller", "g": false}, {"n": 16, "first": "Justin", "last": "Stanbra", "g": false}, {"n": 18, "first": "Brendan", "last": "Lindsay", "g": false}, {"n": 21, "first": "Dave", "last": "Llewellyn", "g": false}, {"n": 39, "first": "Adam", "last": "Tharenos", "g": false}, {"n": 44, "first": "Hunter", "last": "Hukari", "g": false}, {"n": 78, "first": "Harrison", "last": "Hukari", "g": false}, {"n": 97, "first": "Schandler", "last": "Rogers", "g": false}]}, {"name": "Vipers", "players": [{"n": 4, "first": "Cole", "last": "Rodriguez", "g": false}, {"n": 12, "first": "Joe", "last": "Lemcke", "g": false}, {"n": 13, "first": "Kyle", "last": "White", "g": false}, {"n": 15, "first": "David", "last": "Smith", "g": false}, {"n": 17, "first": "Sean", "last": "Hazlett", "g": false}, {"n": 22, "first": "Chris", "last": "Merriman", "g": false}, {"n": 23, "first": "Mario", "last": "Lucas", "g": false}, {"n": 35, "first": "Joe", "last": "Delisi", "g": false}, {"n": 38, "first": "Jason", "last": "Kunst", "g": false}, {"n": 42, "first": "Tyler", "last": "Henson", "g": false}, {"n": 44, "first": "Cody", "last": "Caccia", "g": false}, {"n": 45, "first": "Nick", "last": "Caccia", "g": false}, {"n": 47, "first": "Raine", "last": "Morris", "g": false}, {"n": 53, "first": "Bobby", "last": "Rodermund", "g": false}, {"n": 68, "first": "Ryan", "last": "Olszewski", "g": false}, {"n": 75, "first": "Chris", "last": "Ellis", "g": false}, {"n": 93, "first": "Austin", "last": "Huelsing", "g": false}]}, {"name": "War Dogs", "players": [{"n": 19, "first": "Chris", "last": "Young", "g": false}, {"n": 23, "first": "Mark", "last": "Maynard", "g": false}, {"n": 27, "first": "Robert", "last": "Wilmes", "g": false}, {"n": 31, "first": "Chris", "last": "Jones", "g": false}, {"n": 41, "first": "Brian", "last": "Blackmon", "g": false}, {"n": 51, "first": "Traci", "last": "Wagoner", "g": false}, {"n": 54, "first": "Jeff", "last": "Nichols", "g": false}, {"n": 71, "first": "Nick", "last": "Tayon", "g": false}, {"n": 73, "first": "Anthony", "last": "Courtway", "g": false}, {"n": 74, "first": "Todd", "last": "Hays", "g": false}, {"n": 75, "first": "Ryan", "last": "Brekel", "g": false}, {"n": 77, "first": "Matthew", "last": "Novak", "g": false}, {"n": 78, "first": "Drew", "last": "Boyd", "g": false}, {"n": 84, "first": "Devin", "last": "Muraski", "g": false}, {"n": null, "first": "Eli", "last": "Gosney", "g": false}, {"n": null, "first": "Randall", "last": "Gregory", "g": false}, {"n": null, "first": "Brian", "last": "Mantia", "g": false}, {"n": null, "first": "Bill", "last": "Owens", "g": false}]}, {"name": "Wombats", "players": [{"n": 0, "first": "Chris", "last": "Hoffmeister", "g": false}, {"n": 5, "first": "Jacob", "last": "Barrett", "g": false}, {"n": 19, "first": "Hunter", "last": "Englehart", "g": false}, {"n": 22, "first": "Peter", "last": "Wszalek Jr.", "g": false}, {"n": 29, "first": "Nicholas", "last": "Rodgers", "g": false}, {"n": 34, "first": "Nicholas", "last": "Basel", "g": true}, {"n": 54, "first": "Brendan", "last": "Hemby", "g": false}, {"n": 59, "first": "Aaron", "last": "Chenoweth", "g": false}, {"n": 74, "first": "Austin", "last": "Reel", "g": false}, {"n": 75, "first": "Cameron", "last": "Reel", "g": false}, {"n": 88, "first": "Matthew", "last": "Markillie", "g": false}, {"n": 91, "first": "Jace", "last": "Albers", "g": false}]}, {"name": "Wristy Business", "players": [{"n": 0, "first": "Thomas", "last": "Rudolph", "g": false}, {"n": 4, "first": "Michael", "last": "Culter", "g": false}, {"n": 11, "first": "Tyler", "last": "Helwig", "g": false}, {"n": 13, "first": "Brent", "last": "Cauthen", "g": false}, {"n": 27, "first": "CJ", "last": "Guerra", "g": false}, {"n": 29, "first": "Derek", "last": "Masterson", "g": false}, {"n": 30, "first": "Colton", "last": "Bottomley", "g": false}, {"n": 56, "first": "Nich", "last": "Pariman", "g": false}, {"n": 58, "first": "Dylan", "last": "Lykins", "g": false}, {"n": 66, "first": "Marc", "last": "Schiele", "g": false}, {"n": 77, "first": "Chuck", "last": "Nelson", "g": false}, {"n": 99, "first": "Kolbie", "last": "Nolan", "g": false}]}];
+var SCHEDULE = [{"g": 13, "t": "7:00 AM", "a": "Milkmen", "h": "Wombats", "tier": "3A"}, {"g": 14, "t": "7:15 AM", "a": "Cake Eaters", "h": "Bolts", "tier": "2"}, {"g": 15, "t": "8:20 AM", "a": "USA Warriors", "h": "War Dogs", "tier": "4B"}, {"g": 16, "t": "8:35 AM", "a": "Rink Weiners", "h": "Mighty Drunks", "tier": "4A"}, {"g": 17, "t": "9:40 AM", "a": "TBD", "h": "TBD", "tier": "4B"}, {"g": 18, "t": "9:55 AM", "a": "Buncha Oldies", "h": "Toe Dragons", "tier": "3B"}, {"g": 19, "t": "11:00 AM", "a": "Scott Archers", "h": "Quackheads", "tier": "3A"}, {"g": 20, "t": "11:15 AM", "a": "Angry Beavers Upper", "h": "Veterans United", "tier": "2"}, {"g": 21, "t": "12:20 PM", "a": "Angry Beavers Lower", "h": "Ghost Peppers", "tier": "4A"}, {"g": 22, "t": "12:35 PM", "a": "Wristy Business", "h": "Charlie Foxtrot", "tier": "3B"}, {"g": 23, "t": "1:40 PM", "a": "Vipers", "h": "Buncha Oldies", "tier": "3B"}, {"g": 24, "t": "1:55 PM", "a": "Shift Happens", "h": "War Dogs", "tier": "4B"}, {"g": 25, "t": "3:00 PM", "a": "Rink Weiners", "h": "Deep Blue", "tier": "4A"}, {"g": 26, "t": "3:15 PM", "a": "Milkmen", "h": "Scott Archers", "tier": "3A"}, {"g": 27, "t": "4:20 PM", "a": "Bolts", "h": "Veterans United", "tier": "2"}, {"g": 28, "t": "4:35 PM", "a": "Wombats", "h": "Quackheads", "tier": "3A"}, {"g": 29, "t": "5:40 PM", "a": "Cake Eaters", "h": "Angry Beavers Upper", "tier": "2"}, {"g": 30, "t": "5:55 PM", "a": "USA Warriors", "h": "Mid Ice Crisis", "tier": "4B"}, {"g": 31, "t": "7:00 PM", "a": "Charlie Foxtrot", "h": "Vipers", "tier": "3B"}, {"g": 32, "t": "7:15 PM", "a": "Angry Beavers Lower", "h": "Mighty Drunks", "tier": "4A"}, {"g": 33, "t": "8:20 PM", "a": "Toe Dragons", "h": "Wristy Business", "tier": "3B"}, {"g": 34, "t": "8:35 PM", "a": "Ghost Peppers", "h": "Deep Blue", "tier": "4A"}];
+var ACCENTS = ["#B58BD6","#F2D9A0","#8FD1C0","#E89A9A","#9FB8E8","#D8D8D8"];
+var STORE_KEY = "hth-callsheet-v1";
+
+/* ---------- state ---------- */
+var state = null;
+function freshState() {
+  var lib = RAW_TEAMS.map(function (t, ti) {
+    return {
+      name: t.name,
+      accent: ACCENTS[ti % ACCENTS.length],
+      players: t.players.map(function (p, pi) {
+        return { id: "t"+ti+"_"+pi, n: p.n, first: p.first, last: p.last, g: !!p.g };
+      })
+    };
+  });
+  var li = idxByName(lib, "Milkmen"), ri = idxByName(lib, "Wombats");
+  return { library: lib, leftIdx: li<0?0:li, rightIdx: ri<0?1:ri,
+           editing: false, selGame: 13 };
+}
+function idxByName(lib, name) {
+  for (var i=0;i<lib.length;i++) if (lib[i].name===name) return i;
+  return -1;
+}
+function save() {
+  try { localStorage.setItem(STORE_KEY, JSON.stringify({
+    library: state.library, leftIdx: state.leftIdx,
+    rightIdx: state.rightIdx, selGame: state.selGame })); } catch(e){}
+}
+function load() {
+  state = freshState();
+  try {
+    var raw = localStorage.getItem(STORE_KEY);
+    if (raw) {
+      var s = JSON.parse(raw);
+      if (s && s.library && s.library.length) {
+        state.library = s.library;
+        state.leftIdx = Math.min(s.leftIdx||0, s.library.length-1);
+        state.rightIdx = Math.min(s.rightIdx||0, s.library.length-1);
+        state.selGame = s.selGame || null;
+      }
+    }
+  } catch(e){}
+}
+
+/* ---------- helpers ---------- */
+var KEEP_UPPER = {CJ:1,PJ:1,AJ:1,RJ:1};
+function cap(w) {
+  if (w.length<=2 && KEEP_UPPER[w.toUpperCase()]) return w.toUpperCase();
+  return w.split("-").map(function(s){
+    return s ? s.charAt(0).toUpperCase()+s.slice(1).toLowerCase() : s;
+  }).join("-");
+}
+function splitName(raw) {
+  var words = raw.trim().split(/\s+/).filter(Boolean);
+  if (!words.length) return null;
+  if (words.length===1) return { first:"", last:cap(words[0]) };
+  return { first:cap(words[0]), last:words.slice(1).map(cap).join(" ") };
+}
+function sortRoster(list) {
+  return list.slice().sort(function(a,b){
+    if (a.n==null && b.n==null) return a.last.localeCompare(b.last);
+    if (a.n==null) return 1;
+    if (b.n==null) return -1;
+    return a.n-b.n;
+  });
+}
+function parsePaste(text) {
+  var out = [];
+  text.split(/\n+/).forEach(function(raw,i){
+    var line = raw.replace(/\t/g," ").trim();
+    if (!line) return;
+    var g=false, toks=line.split(/\s+/);
+    if (toks.indexOf("G")>=0 && toks.length>2) {
+      g=true; line = toks.filter(function(w){return w!=="G";}).join(" ");
+    }
+    var m = line.match(/^#?\s*(\d+)?\s*(.*)$/);
+    if (!m || !m[2]) return;
+    var name = splitName(m[2].replace(/[^A-Za-z\s'.\-]/g," "));
+    if (!name || !name.last) return;
+    out.push({ id:"p"+Date.now()+"_"+i,
+      n:(m[1]!==undefined&&m[1]!=="")?parseInt(m[1],10):null,
+      first:name.first, last:name.last, g:g });
+  });
+  return out;
+}
+function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;")
+  .replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+function el(html){ var d=document.createElement("div"); d.innerHTML=html;
+  return d.firstElementChild; }
+
+/* per-column open paste box */
+var pasteOpen = { L:false, R:false };
+
+/* ---------- render ---------- */
+function render(){ renderSchedule(); renderCol("L"); renderCol("R");
+  var b=document.getElementById("editBtn");
+  b.textContent = state.editing ? "Done" : "Edit";
+  b.className = "btn" + (state.editing ? " on" : "");
+}
+
+function renderSchedule(){
+  var host = document.getElementById("sched");
+  host.innerHTML = "";
+  SCHEDULE.forEach(function(gm){
+    var tbd = gm.a==="TBD";
+    var b = el('<button class="game'+(state.selGame===gm.g?" sel":"")+(tbd?" tbd":"")+'">'
+      +'<div class="gt">'+esc(gm.t)+' · G'+gm.g+'</div>'
+      +'<div class="gm">'+esc(gm.a)+' v '+esc(gm.h)+'</div>'
+      +'<div class="tier">Tier '+esc(gm.tier)+'</div></button>');
+    if (!tbd) b.onclick = function(){
+      var li = idxByName(state.library, gm.a), ri = idxByName(state.library, gm.h);
+      if (li>=0) state.leftIdx = li;
+      if (ri>=0) state.rightIdx = ri;
+      state.selGame = gm.g; save(); render();
+    };
+    host.appendChild(b);
+  });
+}
+
+function renderCol(side){
+  var host = document.getElementById(side==="L"?"colL":"colR");
+  var idx = side==="L" ? state.leftIdx : state.rightIdx;
+  var team = state.library[idx];
+  host.innerHTML = "";
+
+  /* header */
+  var head = el('<div class="colhead" style="border-top:3px solid '+team.accent+'"></div>');
+  var sel = el('<select class="teamsel" style="color:'+team.accent+'"></select>');
+  state.library.forEach(function(t,i){
+    var o = document.createElement("option");
+    o.value=i; o.textContent=t.name; if (i===idx) o.selected=true;
+    sel.appendChild(o);
+  });
+  sel.onchange = function(){
+    if (side==="L") state.leftIdx=parseInt(sel.value,10);
+    else state.rightIdx=parseInt(sel.value,10);
+    state.selGame=null; save(); render();
+  };
+  head.appendChild(sel);
+  if (state.editing) {
+    var sw = el('<div class="swatches"></div>');
+    ACCENTS.forEach(function(c){
+      var s = el('<button class="swatch'+(team.accent===c?" sel":"")
+        +'" style="background:'+c+'" aria-label="color"></button>');
+      s.onclick=function(){ team.accent=c; save(); render(); };
+      sw.appendChild(s);
+    });
+    head.appendChild(sw);
+  }
+  host.appendChild(head);
+
+  /* edit tools */
+  if (state.editing) {
+    var tools = el('<div class="tools"></div>');
+    var rowT = el('<div class="toolrow"></div>');
+    var pbtn = el('<button class="btn'+(pasteOpen[side]?" on":"")+'">Paste new team</button>');
+    pbtn.onclick=function(){ pasteOpen[side]=!pasteOpen[side]; render(); };
+    var abtn = el('<button class="btn">+ Player</button>');
+    abtn.onclick=function(){
+      team.players.push({id:"n"+Date.now(),n:null,first:"",last:"",g:false});
+      save(); render();
+    };
+    rowT.appendChild(pbtn); rowT.appendChild(abtn); tools.appendChild(rowT);
+    if (pasteOpen[side]) {
+      var ta = el('<textarea rows="6" placeholder="One player per line:\n5 NICK SEITZ\n70 NATE BROWN G\nCOLE KERSTING"></textarea>');
+      var go = el('<div style="margin-top:6px"><button class="btn on">Add as new team</button></div>');
+      go.firstElementChild.onclick=function(){
+        var parsed = parsePaste(ta.value);
+        if (!parsed.length) return;
+        state.library.push({name:"New Team",accent:team.accent,players:parsed});
+        var ni = state.library.length-1;
+        if (side==="L") state.leftIdx=ni; else state.rightIdx=ni;
+        pasteOpen[side]=false; state.selGame=null; save(); render();
+      };
+      tools.appendChild(ta); tools.appendChild(go);
+    }
+    host.appendChild(tools);
+  }
+
+  /* rows */
+  var sorted = sortRoster(team.players);
+  sorted.forEach(function(p){
+    if (state.editing) {
+      var r = el('<div class="row erow"></div>');
+      var inN = el('<input class="en" inputmode="numeric" placeholder="#" value="'+(p.n==null?"":p.n)+'">');
+      inN.onchange=function(){ p.n = inN.value===""?null:parseInt(inN.value,10)||0; save(); render(); };
+      var inL = el('<input class="el" placeholder="Last" value="'+esc(p.last)+'">');
+      inL.onchange=function(){ p.last=inL.value; save(); };
+      var inF = el('<input class="ef" placeholder="First" value="'+esc(p.first)+'">');
+      inF.onchange=function(){ p.first=inF.value; save(); };
+      var g = el('<button class="chip"'+(p.g?' style="background:'+team.accent+';color:#10151A;border-color:'+team.accent+'"':'')+'>G</button>');
+      g.onclick=function(){ p.g=!p.g; save(); render(); };
+      var x = el('<button class="chip del">✕</button>');
+      x.onclick=function(){
+        team.players = team.players.filter(function(q){return q.id!==p.id;});
+        save(); render();
+      };
+      r.appendChild(inN); r.appendChild(inL); r.appendChild(inF);
+      r.appendChild(g); r.appendChild(x);
+      host.appendChild(r);
+    } else {
+      var gt = p.g ? '<span class="gtag" style="color:'+team.accent+'">G</span>' : "";
+      host.appendChild(el('<div class="row">'
+        +'<div class="num">'+(p.n==null?"–":p.n)+'</div><div class="sep"></div>'
+        +'<div class="nm"><div class="last">'+esc(p.last)+gt+'</div>'
+        +'<div class="first">'+esc(p.first)+'</div></div></div>'));
+    }
+  });
+}
+
+document.getElementById("editBtn").onclick=function(){
+  state.editing=!state.editing; render();
+};
+
+load(); render();
+</script>
+</body>
+</html>
